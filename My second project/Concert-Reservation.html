@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONCERT RESERVATION</title>
+    <link rel="stylesheet" href="Concert-Reservation.css">
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-logo" onclick="showPage('main')">BEAT TICKET</div>
+        <div class="nav-links">
+            <a href="javascript:void(0)" onclick="showPage('main')">Home</a>
+            <a href="javascript:void(0)" onclick="showPage('login')">Login</a>
+            <a href="javascript:void(0)" onclick="showPage('orders')">My Orders</a>
+        </div>
+    </nav>
+
+    <section id="main" class="page-section">
+    <h2 class="section-title">Now Playing</h2>
+    <div class="concert-grid">
+        
+        <div class="concert-card">
+            <img src="IMG/midnight.jpg" alt="Midnight" class="poster-img">
+            <div class="concert-info">
+                <span class="date">2025.05.20</span>
+                <h3>The Midnight Echo</h3>
+                <p class="price">99,000원</p>
+                <button class="view-btn" onclick="openDetail('Midnight')">상세보기</button>
+            </div>
+        </div>
+
+        <div class="concert-card">
+            <img src="IMG/neon.jpg" alt="Neon" class="poster-img">
+            <div class="concert-info">
+                <span class="date">2025.06.15</span>
+                <h3>Neon Horizon</h3>
+                <p class="price">120,000원</p>
+                <button class="view-btn" onclick="openDetail('Neon')">상세보기</button>
+            </div>
+        </div>
+
+        <div class="concert-card">
+            <img src="IMG/cyber.jpg" alt="Cyber" class="poster-img">
+            <div class="concert-info">
+                <span class="date">2025.07.01</span>
+                <h3>Cyber Pulse</h3>
+                <p class="price">88,000원</p>
+                <button class="view-btn" onclick="openDetail('Cyber')">상세보기</button>
+            </div>
+        </div>
+
+        <div class="concert-card">
+            <img src="IMG/retro.jpg" alt="Retro" class="poster-img">
+            <div class="concert-info">
+                <span class="date">2025.08.12</span>
+                <h3>Retro Wave</h3>
+                <p class="price">110,000원</p>
+                <button class="view-btn" onclick="openDetail('Retro')">상세보기</button>
+            </div>
+        </div>
+
+    </div> </section>
+
+    <section id="detail" class="page-section detail-view" style="display:none;">
+    <div class="detail-container">
+        <div class="detail-poster">
+    <img id="detail-poster-img" src="" alt="공연 포스터">
+</div>
+        </div>
+
+        <div class="detail-content">
+            <h1 id="detail-title">공연명</h1>
+            <p id="detail-description" class="description">상세 설명</p>
+            
+            <div class="order-box">
+                <span id="detail-price-text" class="price">0원</span>
+                <input type="number" value="1" min="1" max="100" id="ticket-qty" style="width: 60px; padding: 5px;">
+                <button class="reserve-btn" onclick="processOrder()" style="background:#00ff88; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">예매하기</button>
+            </div>
+
+            <button onclick="showPage('main')" style="margin-top:20px; background:#444; color:#fff; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; width:100%;">목록으로 돌아가기</button>
+        </div>
+    </div>
+</section>
+
+    <section id="login" class="page-section auth-view" style="display:none;">
+        <div class="auth-card" id="login-form">
+            <h2>LOGIN</h2>
+            <input type="email" placeholder="이메일을 입력하세요">
+            <input type="password" placeholder="비밀번호를 입력하세요">
+            <button class="login-btn">로그인</button>
+            <p class="auth-toggle">계정이 없으신가요? <button class="link-style-btn" onclick="toggleAuth('signup')">회원가입</button></p>
+        </div>
+
+        <div class="auth-card" id="signup-form" style="display:none;">
+            <h2>SIGN UP</h2>
+            <input type="text" placeholder="이름을 입력하세요">
+            <input type="email" placeholder="이메일을 입력하세요">
+            <input type="password" placeholder="비밀번호를 입력하세요">
+            <input type="password" placeholder="비밀번호 재확인">
+            <button class="login-btn">가입하기</button>
+            <p class="auth-toggle">이미 계정이 있으신가요? <button class="link-style-btn" onclick="toggleAuth('login')">로그인</button></p>
+        </div>
+    </section>
+
+    <section id="orders" class="page-section" style="display:none;">
+        <h2 class="section-title">My Orders</h2>
+        <table class="order-table">
+            <thead>
+                <tr><th>예매번호</th><th>공연명</th><th>일자</th><th>수량</th><th>금액</th></tr>
+            </thead>
+            <tbody>
+</tbody>
+
+<tbody id="order-history">
+    </tbody>
+        </table>
+    </section>
+
+    <script>
+    // [데이터 저장소] 주문 내역을 담을 배열 (백엔드 DB 역할)
+    let orderList = [];
+
+    // 페이지 전환 함수
+    function showPage(pageId) {
+        document.querySelectorAll('.page-section').forEach(section => {
+            section.style.display = 'none';
+        });
+        document.getElementById(pageId).style.display = 'block';
+        window.scrollTo(0,0);
+        
+        // 주문 내역 페이지를 열 때마다 테이블을 새로 그림
+        if(pageId === 'orders') renderOrderTable();
+    }
+
+    // 상세보기 데이터 매칭 함수
+    // 상세보기 데이터 매칭 함수 (4개 공연 통합)
+function openDetail(concertType) {
+    try {
+        const title = document.getElementById('detail-title');
+        const desc = document.getElementById('detail-description');
+        const price = document.getElementById('detail-price-text');
+        const poster = document.getElementById('detail-poster-img'); // 하나만 가져옴
+
+        if(concertType === 'Midnight') {
+            title.innerText = "The Midnight Echo";
+            desc.innerText = "어둠 속에서 울려퍼지는 밤의 멜로디.";
+            price.innerText = "99,000원";
+            poster.src = "IMG/midnight.jpg"; 
+        } else if(concertType === 'Neon') {
+            title.innerText = "Neon Horizon";
+            desc.innerText = "화려한 네온사인과 일렉트로닉 비트.";
+            price.innerText = "120,000원";
+            poster.src = "IMG/neon.jpg";
+        } else if(concertType === 'Cyber') {
+            title.innerText = "Cyber Pulse";
+            desc.innerText = "미래 도시의 심장박동.";
+            price.innerText = "88,000원";
+            poster.src = "IMG/cyber.jpg";
+        } else if(concertType === 'Retro') {
+            title.innerText = "Retro Wave";
+            desc.innerText = "80년대 감성의 신스팝.";
+            price.innerText = "110,000원";
+            poster.src = "IMG/retro.jpg";
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    showPage('detail');
+}
+
+    // [핵심 기능] 예매 버튼 클릭 시 실행되는 함수
+    function processOrder() {
+        const qty = parseInt(document.getElementById('ticket-qty').value);
+        const title = document.getElementById('detail-title').innerText;
+        const priceText = document.getElementById('detail-price-text').innerText;
+        const price = parseInt(priceText.replace(/[^0-9]/g, '')); // "99,000원" -> 99000 숫자 추출
+
+        // 가이드 제한 사항: 100장 체크
+        if (qty > 100) {
+            alert("1인당 최대 100장까지만 예매 가능합니다.");
+            return;
+        }
+
+        // 새로운 주문 객체 생성
+        const newOrder = {
+            id: "ORD-" + Math.floor(Math.random() * 1000000), // 랜덤 예매번호
+            title: title,
+            date: new Date().toLocaleDateString(), // 현재 날짜
+            qty: qty,
+            total: (price * qty).toLocaleString() + "원"
+        };
+
+        // 배열에 저장
+        // orderList.push(newOrder);
+
+        alert(title + " " + qty + "매 예매가 불가합니다.");
+    }
+
+    // [핵심 기능] 주문 배열을 테이블로 그려주는 함수
+    function renderOrderTable() {
+        const tbody = document.getElementById('order-history');
+        
+        if (orderList.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">주문 내역이 없습니다.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = orderList.map(order => `
+            <tr>
+                <td>${order.id}</td>
+                <td>${order.title}</td>
+                <td>${order.date}</td>
+                <td>${order.qty}매</td>
+                <td>${order.total}</td>
+            </tr>
+        `).join('');
+    }
+
+    // 로그인 <-> 회원가입 전환
+    function toggleAuth(type) {
+        if(type === 'signup') {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('signup-form').style.display = 'block';
+        } else {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('signup-form').style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

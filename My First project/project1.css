@@ -1,0 +1,109 @@
+/* 기본 초기화 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: radial-gradient(circle at center, #1a1a2e 0%, #050505 100%);
+    color: #fff;
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+input[type="checkbox"] { display: none; }
+
+.game-container { max-width: 500px; width: 100%; padding: 20px; animation: bootUp 1s ease-out; }
+
+@keyframes bootUp {
+    from { opacity: 0; transform: scale(0.95); filter: blur(10px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+/* 헤더 & 로고 */
+.game-header { text-align: center; margin-bottom: 30px; }
+.logo { font-size: 2.5rem; font-weight: 900; letter-spacing: 6px; color: #00ff88; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5); }
+.subtitle { color: #555; font-size: 0.8rem; margin-top: 5px; }
+
+/* 미션 브리핑 */
+.mission-brief { background: rgba(255, 255, 255, 0.02); border: 1px solid #222; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; border-left: 4px solid #00ff88; }
+
+/* 그리드 디자인 */
+.puzzle-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: #111;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.grid-cell {
+    aspect-ratio: 1;
+    background: #1a1a1a;
+    border: 1px solid #222;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #333;
+    font-weight: bold;
+}
+
+.grid-cell:hover { background: #222; border-color: #444; }
+/* 정답 타일(5, 7, 10, 14)만 배경을 더 진한 검정으로 설정 */
+.grid-cell:nth-child(5),
+.grid-cell:nth-child(7),
+.grid-cell:nth-child(10),
+.grid-cell:nth-child(14) {
+    background: #000000; /* 완전한 검정 */
+    border-color: #111;   /* 테두리도 살짝 더 어둡게 */
+}
+
+/* ✅ 로직 적용: 체크박스 선택 시 */
+#cell1:checked ~ .game-container label[for="cell1"], #cell2:checked ~ .game-container label[for="cell2"],
+#cell3:checked ~ .game-container label[for="cell3"], #cell4:checked ~ .game-container label[for="cell4"],
+#cell5:checked ~ .game-container label[for="cell5"], #cell6:checked ~ .game-container label[for="cell6"],
+#cell7:checked ~ .game-container label[for="cell7"], #cell8:checked ~ .game-container label[for="cell8"],
+#cell9:checked ~ .game-container label[for="cell9"], #cell10:checked ~ .game-container label[for="cell10"],
+#cell11:checked ~ .game-container label[for="cell11"], #cell12:checked ~ .game-container label[for="cell12"],
+#cell13:checked ~ .game-container label[for="cell13"], #cell14:checked ~ .game-container label[for="cell14"],
+#cell15:checked ~ .game-container label[for="cell15"], #cell16:checked ~ .game-container label[for="cell16"] {
+    background: rgba(0, 255, 136, 0.15); border-color: #00ff88; color: #00ff88; box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+/* 결과 메시지 */
+.result-display > div { display: none; margin-top: 20px; padding: 20px; border-radius: 10px; text-align: center; font-size: 0.9rem; }
+
+/* 실패 로직 */
+#cell1:checked ~ .game-container .failure-message, #cell2:checked ~ .game-container .failure-message,
+#cell3:checked ~ .game-container .failure-message, #cell4:checked ~ .game-container .failure-message,
+#cell6:checked ~ .game-container .failure-message, #cell8:checked ~ .game-container .failure-message,
+#cell9:checked ~ .game-container .failure-message, #cell11:checked ~ .game-container .failure-message,
+#cell12:checked ~ .game-container .failure-message, #cell13:checked ~ .game-container .failure-message,
+#cell15:checked ~ .game-container .failure-message, #cell16:checked ~ .game-container .failure-message {
+    display: block; border: 1px solid #ff4d4d; color: #ff4d4d; background: rgba(255, 77, 77, 0.05);
+}
+
+/* 성공 로직 */
+#cell5:checked ~ #cell7:checked ~ #cell10:checked ~ #cell14:checked ~ .game-container .success-message {
+    display: block; border: 1px solid #00ff88; color: #00ff88; background: rgba(0, 255, 136, 0.05);
+}
+
+/* 혼선 방지 (실패 섞이면 성공 가리기) */
+#cell1:checked ~ .game-container .success-message, #cell2:checked ~ .game-container .success-message,
+#cell3:checked ~ .game-container .success-message, #cell4:checked ~ .game-container .success-message,
+#cell6:checked ~ .game-container .success-message, #cell8:checked ~ .game-container .success-message,
+#cell9:checked ~ .game-container .success-message, #cell11:checked ~ .game-container .success-message,
+#cell12:checked ~ .game-container .success-message, #cell13:checked ~ .game-container .success-message,
+#cell15:checked ~ .game-container .success-message, #cell16:checked ~ .game-container .success-message {
+    display: none;
+}
+
+/* 컨트롤 버튼 */
+.game-controls { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; align-items: center; }
+.reset-btn { background: #00ff88; color: #000; padding: 12px 40px; text-decoration: none; border-radius: 4px; font-weight: 900; font-size: 0.8rem; letter-spacing: 2px; transition: 0.3s; }
+.reset-btn:hover { box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); transform: translateY(-2px); }
+.back-link { color: #444; text-decoration: none; font-size: 0.7rem; letter-spacing: 1px; transition: 0.3s; }
+.back-link:hover { color: #fff; }
